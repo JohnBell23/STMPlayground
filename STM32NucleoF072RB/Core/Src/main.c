@@ -46,6 +46,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+TIM_OC_InitTypeDef sConfigOC = {0};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +56,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
+
 
 /* USER CODE END PFP */
 
@@ -97,14 +100,55 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
+  int blickCounter=0;
+  int pwmCounter=0;
+
+  int countUp=1;
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(1000);
+	  if (++blickCounter >= 900){
+		  blickCounter=0;
+		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  }
+
+	  if (++pwmCounter%25==0){
+		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+
+		if (countUp){
+			sConfigOC.Pulse += 1; // Puls Dauer zu 255
+
+			if (sConfigOC.Pulse>=250){
+				countUp=0;
+				pwmCounter=0;
+			}
+
+		}else{
+			sConfigOC.Pulse -= 1;
+
+			if (sConfigOC.Pulse==0){
+				countUp=1;
+				pwmCounter=0;
+			}
+		}
+
+		if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
+			Error_Handler();
+		}else{
+			HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+		}
+	  }
+
+	  if (pwmCounter>=1000){
+		  pwmCounter=0;
+	  }
+
+	  HAL_Delay(1);
 
     /* USER CODE END WHILE */
 
@@ -167,7 +211,7 @@ static void MX_TIM3_Init(void)
   /* USER CODE END TIM3_Init 0 */
 
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
+  //TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
@@ -189,7 +233,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 77;
+  sConfigOC.Pulse = 0; // Puls Dauer zu 255
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
