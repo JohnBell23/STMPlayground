@@ -63,6 +63,14 @@ static void MX_TIM3_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+uint8_t doBlink=1;
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+
+	doBlink=!doBlink;
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -106,19 +114,28 @@ int main(void)
   int countUp=1;
 
 
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (++blickCounter >= 900){
-		  blickCounter=0;
+
+	  if (doBlink){
 		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		  doBlink=0;
 	  }
 
-	  if (++pwmCounter%25==0){
-		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+
+	  if (++blickCounter >= 500){
+		  blickCounter=0;
+		  //HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  }
+
+	  // modify pwm -->>
+	  if (++pwmCounter%50==0){
 
 		if (countUp){
 			sConfigOC.Pulse += 1; // Puls Dauer zu 255
@@ -137,16 +154,15 @@ int main(void)
 			}
 		}
 
-		if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
-			Error_Handler();
-		}else{
-			HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-		}
+		// Duty cycle ändern
+		////__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,sConfigOC.Pulse);
+
 	  }
 
 	  if (pwmCounter>=1000){
 		  pwmCounter=0;
 	  }
+	  // <<-- modify pwm
 
 	  HAL_Delay(1);
 
@@ -211,7 +227,7 @@ static void MX_TIM3_Init(void)
   /* USER CODE END TIM3_Init 0 */
 
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  //TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
@@ -233,7 +249,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0; // Puls Dauer zu 255
+  sConfigOC.Pulse = 127;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -301,11 +317,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
@@ -314,7 +330,27 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /*Configure GPIO pin : USER_BUTTON_PIN */
+    GPIO_InitStruct.Pin = GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+
+    /*Configure GPIO pin : PC13 */
+    GPIO_InitStruct.Pin = GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; // Interrupt auf fallender Flanke, d.h. Button Release
+    GPIO_InitStruct.Pull = GPIO_NOPULL;          // Oder GPIO_PULLUP, wenn benötigt
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
