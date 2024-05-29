@@ -43,8 +43,6 @@
 
 /* USER CODE BEGIN PV */
 
-
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +60,10 @@ uint8_t doBlink=1;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-	doBlink=!doBlink;
+	doBlink++;
+	if (doBlink>2){
+		doBlink=0;
+	}
 }
 
 
@@ -99,9 +100,6 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
-
-
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,15 +107,22 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
-	  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
+	  if (doBlink==0){
+		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
 	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
-	  HAL_Delay(200);
+		  HAL_Delay(200);
 
-	  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
+		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
 	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_SET);
 
-	  HAL_Delay(200);
+		  HAL_Delay(200);
+	  } else if (doBlink==1){
+		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
+		  	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_SET);
+  	  } else if (doBlink==2){
+  		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
+  		  	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
+  	  }
 
     /* USER CODE BEGIN 3 */
   }
