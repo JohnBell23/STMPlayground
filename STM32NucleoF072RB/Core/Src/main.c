@@ -58,7 +58,10 @@ static void MX_GPIO_Init(void);
 
 uint8_t doBlink=1;
 
+// Button Interrupt
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+
+	nextButtonState();
 
 	doBlink++;
 	if (doBlink>2){
@@ -66,6 +69,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	}
 }
 
+/////////////////////////////////
+// SysTick Handler
+void MySysInterrupt(void){
+	static int i=0;
+	i++;
+}
+
+void SysTick_Init(void) {
+    // System Core Clock ist 48 MHz
+    uint32_t SystemCoreClock = 48000000;
+
+    // Konfiguriere SysTick, um alle 1 ms zu unterbrechen
+    SysTick->LOAD = (SystemCoreClock / 1000) - 1; // 1 ms
+    SysTick->VAL = 0; // Clear current value register
+    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk   // Enable SysTick interrupt
+                  | SysTick_CTRL_ENABLE_Msk;   // Enable SysTick Timer
+}
+
+
+/////////////////////////////////
 
 /* USER CODE END 0 */
 
@@ -86,6 +109,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+
+  SysTick_Init();
 
   /* USER CODE END Init */
 
@@ -183,12 +208,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
                           |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PA0_Pin PA1_Pin PA4_Pin PA5_Pin
                            PA6_Pin PA7_Pin PA2_Pin PA3_Pin */
   GPIO_InitStruct.Pin = PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
@@ -213,17 +232,10 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /*Configure GPIO pin : USER_BUTTON_PIN */
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-
-    /*Configure GPIO pin : PC13 */
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; // Interrupt auf fallender Flanke, d.h. Button Release
-    GPIO_InitStruct.Pull = GPIO_NOPULL;          // Oder GPIO_PULLUP, wenn benötigt
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; // Interrupt auf fallender Flanke, d.h. Button Release
+  GPIO_InitStruct.Pull = GPIO_NOPULL;          // Oder GPIO_PULLUP, wenn benötigt
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 
 

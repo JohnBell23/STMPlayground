@@ -29,9 +29,11 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
+#include "buttonState.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+void MySysInterrupt(void);
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
