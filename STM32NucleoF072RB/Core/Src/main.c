@@ -58,10 +58,12 @@ static void MX_GPIO_Init(void);
 
 uint8_t doBlink=1;
 
+buttonState status;
+
 // Button Interrupt
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-	nextButtonState();
+	buttonStateNext(&status);
 
 	doBlink++;
 	if (doBlink>2){
@@ -74,6 +76,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 void MySysInterrupt(void){
 	static int i=0;
 	i++;
+
+	buttonStateHandleTick(&status);
 }
 
 void SysTick_Init(void) {
@@ -125,6 +129,8 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
+  buttonStateInit(&status);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -132,22 +138,6 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  if (doBlink==0){
-		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
-		  HAL_Delay(200);
-
-		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_SET);
-
-		  HAL_Delay(200);
-	  } else if (doBlink==1){
-		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-		  	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_SET);
-  	  } else if (doBlink==2){
-  		  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-  		  	  	                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
-  	  }
 
     /* USER CODE BEGIN 3 */
   }
@@ -204,18 +194,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-                          |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : PA0_Pin PA1_Pin PA4_Pin PA5_Pin
-                           PA6_Pin PA7_Pin PA2_Pin PA3_Pin */
-  GPIO_InitStruct.Pin = PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
-                          |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  ledsInit();
 
   /*Configure GPIO pins : PA2 PA3 */
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
