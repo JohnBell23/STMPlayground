@@ -56,35 +56,26 @@ static void MX_GPIO_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t doBlink=1;
-
-buttonState status;
+ledMode status;
 
 // Button Interrupt
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-	buttonStateNext(&status);
-
-	doBlink++;
-	if (doBlink>2){
-		doBlink=0;
-	}
+	ledMode_Next(&status);
 }
 
 /////////////////////////////////
 // SysTick Handler
 void MySysInterrupt(void){
-	static int i=0;
-	i++;
 
-	buttonStateHandleTick(&status);
+	ledMode_HandleTick(&status);
 }
 
 void SysTick_Init(void) {
     // System Core Clock ist 48 MHz
     uint32_t SystemCoreClock = 48000000;
 
-    // Konfiguriere SysTick, um alle 1 ms zu unterbrechen
+    // Configure 1ms Interrupt
     SysTick->LOAD = (SystemCoreClock / 1000) - 1; // 1 ms
     SysTick->VAL = 0; // Clear current value register
     SysTick->CTRL = SysTick_CTRL_TICKINT_Msk   // Enable SysTick interrupt
@@ -129,7 +120,7 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
-  buttonStateInit(&status);
+  ledMode_Init(&status);
 
   /* USER CODE END 2 */
 
@@ -194,7 +185,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  ledsInit();
+  leds_Init();
 
   /*Configure GPIO pins : PA2 PA3 */
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;

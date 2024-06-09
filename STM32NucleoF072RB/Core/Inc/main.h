@@ -28,7 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
-#include "buttonState.h"
+#include <ledMode.h>
 #include "leds.h"
 
 /* Private includes ----------------------------------------------------------*/

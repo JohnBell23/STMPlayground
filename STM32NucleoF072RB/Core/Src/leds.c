@@ -1,6 +1,6 @@
 #include "leds.h"
 
-void ledsInit(void){
+void leds_Init(void){
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	/*Configure GPIO pin Output Level */
@@ -18,12 +18,19 @@ void ledsInit(void){
 
 }
 
-void ledsOnAll(void){
+void leds_OnAll(void){
 	HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
 			                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_SET);
 }
 
-void ledsOffAll(void){
+void leds_OffAll(void){
 	HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
 		                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
+}
+
+void leds_SetPinExclusive(int pinNumber){
+	HAL_GPIO_WritePin(GPIOA, PA0_Pin|PA1_Pin|PA4_Pin|PA5_Pin
+			                            |PA6_Pin|PA7_Pin|PA2_Pin|PA3_Pin, GPIO_PIN_RESET);
+
+	HAL_GPIO_WritePin(GPIOA, pinNumber, GPIO_PIN_SET);
 }

@@ -20,10 +20,11 @@
 #define PA3_Pin GPIO_PIN_9
 #define PA3_GPIO_Port GPIOA
 
-void ledsInit(void);
+void leds_Init(void);
 
-void ledsOnAll(void);
-void ledsOffAll(void);
+void leds_OnAll(void);
+void leds_OffAll(void);
+void leds_SetPinExclusive(int pinNumber);
 
 
 #endif /* INC_LEDS_H_ */
