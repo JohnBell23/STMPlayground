@@ -57,20 +57,19 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+ledMode status;
+
 // Button Interrupt
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  int i = 0;
-  /// ledMode_Next(&status);
+  ledMode_Next(&status);
 }
 
 /////////////////////////////////
 // SysTick Handler
 void MySysInterrupt(void)
 {
-
-  //////////////ledMode_HandleTick(&status);
-  int i = 0;
+  ledMode_HandleTick(&status);
 }
 
 void SysTick_Init(void)
@@ -121,7 +120,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  int i = 0;
+  ledMode_Init(&status);
 
   /* USER CODE END 2 */
 

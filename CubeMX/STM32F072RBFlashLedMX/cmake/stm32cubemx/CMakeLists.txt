@@ -22,6 +22,8 @@ target_include_directories(stm32cubemx INTERFACE
 
 target_sources(stm32cubemx INTERFACE
     ../../Core/Src/main.c
+    ../../Core/Src/leds.c
+    ../../Core/Src/ledMode.c
     ../../Core/Src/stm32f0xx_it.c
     ../../Core/Src/stm32f0xx_hal_msp.c
     ../../Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_tim.c
