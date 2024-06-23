@@ -12,7 +12,8 @@
 
 #define LEDS_NONE -1
 
-typedef enum LedModeEnum{
+typedef enum LedModeEnum
+{
 	LedMode_Off,
 	LedMode_On,
 	LedMode_Blink,
@@ -20,19 +21,22 @@ typedef enum LedModeEnum{
 	LedMode_HalfRoll
 } LedModeEnum;
 
-typedef struct ledMode{
+typedef struct ledModeType
+{
 	int currentEnabledPin;
 	int ticks;
 	LedModeEnum state;
 	int rollingUp;
 	int halfRollState;
+	void (*handleTickPointer)(struct ledModeType *self);
+	void (*onEntryPointer)(struct ledModeType *self);
+	void (*onExitPointer)(struct ledModeType *self);
 } ledMode;
 
-void ledMode_Init(ledMode* self);
+void ledMode_Init(ledMode *self);
 
-void ledMode_Next(ledMode* self);
+void ledMode_Next(ledMode *self);
 
-void ledMode_HandleTick(ledMode* self);
-
+void ledMode_HandleTick(ledMode *self);
 
 #endif /* INC_LEDMODE_H_ */
