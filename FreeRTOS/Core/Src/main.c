@@ -20,6 +20,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include <stdbool.h>
+#include <string.h>
+#include <my_ringbuffer.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -73,9 +75,12 @@ const osThreadAttr_t task_3_attributes = {
 
 uint8_t rx_byte=0;
 uint8_t rx_buffer[2000]={0};
-uint8_t rx_buffer_idx=0;
+uint8_t rx_buffer_size=0;
 uint32_t rxCount=0;
 bool receiving = false;
+
+uint8_t rxByte2=0;
+ring_buffer uart2Buffer;
 
 /* USER CODE END PV */
 
@@ -130,7 +135,10 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+  /////HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+
+  my_ringbuffer_init(&uart2Buffer);
+  HAL_UART_Receive_IT(&huart2, &rxByte2, 1);
 
   /* USER CODE END 2 */
 
@@ -338,9 +346,10 @@ static void MX_GPIO_Init(void)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+  #define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 	static uint8_t rxBuffer[100];
 	static uint16_t index = 0;
-
 
   /* Prevent unused argument(s) compilation warning */
   UNUSED(huart);
@@ -359,10 +368,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       if (rx_byte == END_DELIMITER)
       {
 
-        for(int i=0;i<index;i++)
-        {
-          rx_buffer[rx_buffer_idx++]= rxBuffer[i];
-        }
+        memcpy(&rx_buffer, &rxBuffer[1], MIN((index-2), sizeof(rxBuffer)));
+        rx_buffer_size=MIN((index-2), sizeof(rxBuffer));
 
         receiving = false;
         index = 0;  // Puffer zurücksetzen
@@ -370,6 +377,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
 
   	HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+  }
+
+  if (huart->Instance == USART2)
+  {
+    my_ringbuffer_add_byte(&uart2Buffer, rxByte2);
+
+    HAL_UART_Receive_IT(&huart2, &rxByte2, 1);
   }
 }
 
@@ -387,7 +401,7 @@ void task_1_function(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  for(;;)
+  while (1)
   {
     HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // LED toggeln
     osDelay(1000);
@@ -407,29 +421,9 @@ void task_2_function(void *argument)
   /* USER CODE BEGIN task_2_function */
   /* Infinite loop */
   while (1)
-    {
-      // UART-Daten empfangen (blockierend)
-	  /*if (HAL_UART_Receive(&huart1, rx_data, sizeof(rx_data), 2000)==HAL_OK)
-	  {
-		  receiving=1;
-
-		  for(int i=0;i<sizeof(rx_data);i++)
-		  {
-			  rx_buffer[rx_buffer_idx++]= rx_data[i];
-		  }
-
-		  rxCount++;
-		  if (rxCount>100)
-		  {
-			  rxCount=0;
-		  }
-
-		  HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data));
-		  receiving=0;
-	  }*/
-
-      osDelay(100);
-    }
+  {
+    osDelay(100);
+  }
   /* USER CODE END task_2_function */
 }
 
@@ -442,17 +436,21 @@ void task_2_function(void *argument)
 /* USER CODE END Header_task_3_function */
 void task_3_function(void *argument)
 {
+  uint8_t send_buffer[RING_BUFFER_LENGTH]={0};
+
+  uint16_t read_size = 0;
+
   /* USER CODE BEGIN task_3_function */
   /* Infinite loop */
-  for(;;)
+  while(1)
   {
-	  if (!receiving && rx_buffer_idx>2)
-	  {
-		  HAL_UART_Transmit(&huart2, rx_buffer, rx_buffer_idx-1, 50); // todo exclude start end delimiters
-		  rx_buffer_idx=0;
+    read_size = my_ringbuffer_read(&uart2Buffer, send_buffer);
 
+	  if (read_size>0)
+	  {
+		  HAL_UART_Transmit(&huart2, send_buffer, read_size, 50);
 	  }
-	  HAL_Delay(50);
+	  osDelay(10);
 
   }
   /* USER CODE END task_3_function */
