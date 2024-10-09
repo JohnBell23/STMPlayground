@@ -109,8 +109,27 @@ void St7735Adapter::drawLine(Coordinate start, Coordinate end)
 
 }
 
-void St7735Adapter::drawCircle(Coordinate center, uint16_t radius)
+void St7735Adapter::drawCircle(Coordinate center, uint16_t radius, bool bold)
 {
+  double x0 = center.x;
+  double y0 = center.y;
+
+  int numPoints = 40;
+
+  for (int i = 0; i < numPoints; ++i)
+  {
+    double theta = 2.0 * M_PI * i / numPoints;
+
+    double x = x0 + radius * cos(theta);
+    double y = y0 + radius * sin(theta);
+
+    ST7735_DrawPixel(x, y, ST7735_COLOR565(m_drawingColor.r, m_drawingColor.g, m_drawingColor.b));
+    if (bold)
+    {
+      ST7735_DrawPixel(x + 1, y, ST7735_COLOR565(m_drawingColor.r, m_drawingColor.g, m_drawingColor.b));
+      ST7735_DrawPixel(x - 1, y, ST7735_COLOR565(m_drawingColor.r, m_drawingColor.g, m_drawingColor.b));
+    }
+  }
 }
 
 void St7735Adapter::setDrawingColor(uint8_t r, uint8_t g, uint8_t b)

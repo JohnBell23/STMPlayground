@@ -42,7 +42,7 @@ public:
   void drawSine(bool bold = true);
   void drawCosine(bool bold = true);
   void drawLine(Coordinate start, Coordinate end);
-  void drawCircle(Coordinate center, uint16_t radius);
+  void drawCircle(Coordinate center, uint16_t radius, bool bold = true);
 };
 
 } /* namespace ST7735Adapter */
