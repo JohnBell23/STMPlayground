@@ -15,12 +15,17 @@ void cpp_main(void)
 
   ST7735Adapter::St7735Adapter screen;
   screen.init(27, 30, 250);
-  screen.drawCoordSystem(true);
-  screen.drawSine(false);
-  screen.drawCosine(true);
+  screen.setDrawingColor(0xFF, 0xFF, 0xFF);
+
+//  screen.drawCoordSystem(true);
+//  screen.drawSine(true);
+//  screen.drawCosine(true);
+
+  screen.drawLine(
+  { 0, 0 },
+  { 120, 50 });
 
   uint32_t counter = 0;
-
   while (1)
   {
     if (counter++ % 3 == 0)

@@ -14,6 +14,15 @@ namespace ST7735Adapter
 
 class St7735Adapter
 {
+protected:
+  struct DrawingColor
+  {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+  };
+  DrawingColor m_drawingColor
+  { 0xFF, 0xFF, 0xFF };
 public:
   struct Coordinate
   {
@@ -21,10 +30,14 @@ public:
     uint16_t y;
   };
 
+  const uint16_t MAX_EXCLUSIVE = 128;
+  const uint16_t MIN_INCLUSIVE = 0;
+
 public:
   St7735Adapter();
   virtual ~St7735Adapter();
   void init(uint8_t r, uint8_t g, uint8_t b);
+  void setDrawingColor(uint8_t r, uint8_t g, uint8_t b);
   void drawCoordSystem(bool bold = true);
   void drawSine(bool bold = true);
   void drawCosine(bool bold = true);
