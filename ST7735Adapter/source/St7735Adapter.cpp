@@ -139,4 +139,33 @@ void St7735Adapter::setDrawingColor(uint8_t r, uint8_t g, uint8_t b)
   m_drawingColor.b = b;
 }
 
+void St7735Adapter::drawMatrix(Coordinate start, bool matrix[MATRIX_LENGTH][MATRIX_LENGTH], uint16_t blockSize)
+{
+  Coordinate topLeftCorner = start;
+
+  for (int col = 0; col < MATRIX_LENGTH; col++)
+  {
+    for (int row = 0; row < MATRIX_LENGTH; row++)
+    {
+      if (matrix[col][row])
+      {
+        for (uint16_t line = 0; line < blockSize; line++)
+        {
+          Coordinate left
+          { topLeftCorner.x, (uint16_t) (topLeftCorner.y + line) };
+          Coordinate right
+          { (uint16_t) (topLeftCorner.x + blockSize),
+              (uint16_t) (topLeftCorner.y + line) };
+
+          drawLine(left, right);
+        }
+      }
+
+      topLeftCorner.x += blockSize;
+    }
+    topLeftCorner.x = start.x;
+    topLeftCorner.y += blockSize;
+  }
+}
+
 } /* namespace ST7735Adapter */

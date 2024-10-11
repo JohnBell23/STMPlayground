@@ -12,6 +12,8 @@
 namespace ST7735Adapter
 {
 
+#define MATRIX_LENGTH 31
+
 class St7735Adapter
 {
 protected:
@@ -43,6 +45,7 @@ public:
   void drawCosine(bool bold = true);
   void drawLine(Coordinate start, Coordinate end);
   void drawCircle(Coordinate center, uint16_t radius, bool bold = true);
+  void drawMatrix(Coordinate start, bool matrix[MATRIX_LENGTH][MATRIX_LENGTH], uint16_t blockSize);
 };
 
 } /* namespace ST7735Adapter */
